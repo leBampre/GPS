@@ -89,7 +89,7 @@ class _AppState extends State<App>{
 
 
     // инициализируем значение цвета для иконок
-    Color iconsColor = Colors.yellow;
+    Color iconsColor = Colors.yellowAccent[700];
 
 
     /* виджет описывающий ряд в котором будут выводиться текущее
@@ -143,18 +143,18 @@ class _AppState extends State<App>{
 
     // виджет с тревожной кнопкой
     Widget alarmButton = Container(
-      child: Column(
 
-      ),
     );
 
     // виджет описывабщий нижний ряд кнопок
     Widget bottomButtons = Container(
+      padding: EdgeInsetsDirectional.only(top: 10, bottom: 10),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          Expanded(
-            child: _buildButtonIconColumn(iconsColor, Icons.network_wifi),
-          ),
+          _bottomMenuButton(iconsColor, Icons.settings_outlined, 'OPTIONS'),
+          _bottomMenuButton(iconsColor, Icons.chat, 'CHAT'),
+          _bottomMenuButton(iconsColor, Icons.map_rounded, 'MAP'),
         ],
       ),
     );
@@ -167,10 +167,12 @@ class _AppState extends State<App>{
         appBar: AppBar(
           title: appBar,
         ),
-        body: ListView(
+        body: Column(
           children: [
             coordinatesAndSatusIcons,
-            alarmButton,
+            Expanded(
+              child: alarmButton
+            ),
             bottomButtons,
           ],
         ),
@@ -187,16 +189,51 @@ class _AppState extends State<App>{
     // после вызова возвращает контейнер с прописанными ниже характеристиками
     return Container(
       padding: EdgeInsets.only(right: 5),
-      child: Icon(icon, color: color,
+      child: Icon(
+        icon,
+        color: color,
       ),      
     );
   }
 
 
-
-  Column _buildButtonIconColumn(Color color, IconData icon){
-    return Column(
-      
+  ElevatedButton _bottomMenuButton(Color color, IconData icon, String label){
+    return ElevatedButton(
+      style: ButtonStyle(
+        minimumSize: MaterialStateProperty.all<Size>(const Size(100, 75)),
+        backgroundColor: MaterialStateProperty.resolveWith<Color>(
+          (Set<MaterialState> states) {
+            if (states.contains(MaterialState.pressed))
+              return color.withOpacity(0.75); 
+            return Colors.black.withOpacity(0.15);
+          }
+        ),
+        foregroundColor: MaterialStateProperty.resolveWith<Color>(
+          (Set<MaterialState> states) {
+            if (states.contains(MaterialState.pressed))
+              return Colors.black;
+            return color; // Defer to the widget's default.  
+          }
+        ),
+      ), 
+      child: Column(
+        children: [
+          Icon(
+            icon,
+          ),
+          Container(
+            padding: EdgeInsetsDirectional.only(top: 5,),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+      onPressed: () {},
     );
   }
 
