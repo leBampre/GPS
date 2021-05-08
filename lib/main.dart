@@ -1,18 +1,31 @@
 import 'dart:async';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:imei_plugin/imei_plugin.dart';
 
+import 'package:holding_app/connection_listener.dart';
+
 //запуск приложения
-void main() => runApp(App());
+void main() =>  runApp(App());
 
-
+// инициализируем класс App на основе StatefulWidget
 class App extends StatefulWidget{
   @override
+  // создает изменяемое состояние для этого виджета в заданном месте дерева.
   _AppState createState() => _AppState();
 }
-
+/* переопределить этот метод для подкласса,
+  чтобы вернуть вновь созданный экземпляр их связанного подкласса */
 class _AppState extends State<App>{
+  /* создаем коллекцию для состояний модулей мобильной связи и wifi для 
+    их дальнейшего удобного использования*/
+  Map _currentStates = {ConnectivityResult.none:false};
+  // инициализируем переменную для взаимодействия с синглтоном ConnectionStatusSingleton
+  ConnectionStatusSingleton _connectionStatus = ConnectionStatusSingleton.getInstance();
+
+  // инициализиация значение цвета для иконок
+  Color iconsColor = Colors.yellowAccent[700];
 
   // описание переменных
   String _currentCoordinates = "no coordinates";  // переменная в которую заносятся текущие координаты
@@ -21,26 +34,47 @@ class _AppState extends State<App>{
   Timer _timer; // инициализация таймера
   int _commonInquirySec = 5;  // переменная описывающая длительность цикла таймера
 
-  // метод вызываемый при запуске приложения
+  // метод вызываемый при запуске этого подкласса в приложении
+  @override
   void initState(){
-    _getCurrentLocation();
-    _getDeviceImei(); 
     super.initState();
+    
+    // вызов метода initialize() синглтона
+    _connectionStatus.initialize();
+    // инициализация процесса слежения за состоянием интернета и подключений
+    _connectionStatus.connectionChange.listen((source) {
+      // указание в какую переменную записываеть происходящие изменения
+      setState(() => _currentStates = source);
+     });
+
+    // запуск метода определения текущего местоположения
+    _getCurrentLocation();
+    
+    // запуск метода определения imei устройства
+    _getDeviceImei(); 
   }
 
-  // метод вызывается при закрытии страницы
+  // метод вызывается при завершении этого подкласса в приложении
   void dispose (){
+    
+    // завершение потока опроса модулей на подключению к интернету
+    _connectionStatus.disposeStream();
+    
+    // отключение таймера
     _timer.cancel();
+
     super.dispose();
   }
 
   // ф-ция получения имей устройства
   void _getDeviceImei() async{
+    // в переменную imei заносятся полученные от плагина ImeiPlugin данные о IMEI усьройства
     final imei = await ImeiPlugin.getImei();
-
+    // в переменную _deviceIMEI заносятся данные из переменной imei
     setState(() {
       _deviceIMEI = "$imei";
     });
+    // временный вывод переменной в консоль для дебага
     print(_deviceIMEI);
   }
 
@@ -61,7 +95,7 @@ class _AppState extends State<App>{
     // запуск стандартного такта таймера
     _commonInquiry();
   } 
-
+    
   // ф-ция описывающий работу таймера по истечении которого идет запрос текущих координат
   void _commonInquiry(){
 
@@ -75,14 +109,19 @@ class _AppState extends State<App>{
         // условие выполняемое таймером когда он досчитал до нуля
         if(_commonInquirySec == 0){
           setState(() {
+            // возврат исходного состояния таймера 
             _commonInquirySec = 5;
+            // запуск определения текущего положения
             _getCurrentLocation();
+            // отключение текущего таймера, чтоб не возникло утечки памяти
             _timer.cancel();
           });
         // условие если таймер все еще считает
         } else {
             setState(() {
+              // декремент таймера на 1сек
               _commonInquirySec--;
+              // для отладки
               print(_commonInquirySec);
             });
         }
@@ -91,19 +130,15 @@ class _AppState extends State<App>{
   }
 
 
-
   //This widget is the root of the app
   @override
   Widget build(BuildContext context){
-
+ 
     // виджет описывающий апп бар
     Widget appBar = Container(
+      // выводится имей, для дебага
       child: Text(_deviceIMEI),
     );
-
-
-    // инициализируем значение цвета для иконок
-    Color iconsColor = Colors.yellowAccent[700];
 
 
     /* виджет описывающий ряд в котором будут выводиться текущее
@@ -157,14 +192,18 @@ class _AppState extends State<App>{
 
     // виджет с тревожной кнопкой
     Widget alarmButton = Container(
-
+      // для дебага выводится текст о состояния интернет подключения
+      child: Text(test()),
     );
 
     // виджет описывабщий нижний ряд кнопок
     Widget bottomButtons = Container(
+      //описание внутренних отступов контейнера
       padding: EdgeInsetsDirectional.only(top: 10, bottom: 10),
       child: Row(
+        // описание позиционирования внутри ряда Row
         mainAxisAlignment: MainAxisAlignment.spaceAround,
+        // инициализация кнопок с необходимыми вводными данными 
         children: [
           _bottomMenuButton(iconsColor, Icons.settings_outlined, 'OPTIONS'),
           _bottomMenuButton(iconsColor, Icons.chat, 'CHAT'),
@@ -174,7 +213,7 @@ class _AppState extends State<App>{
     );
 
 
-    // возвращаее прописанные в нем параметры, т.е. то что нужно вывести на экран
+    // возвращает прописанные в нем параметры, т.е. то что нужно вывести на экран
     return MaterialApp(
       title: 'Holding Track',
       home: Scaffold(
@@ -184,6 +223,8 @@ class _AppState extends State<App>{
         body: Column(
           children: [
             coordinatesAndSatusIcons,
+            /*центральная часть растягивается чтобы занять все незанятое другими
+              виджетами пространство*/ 
             Expanded(
               child: alarmButton
             ),
@@ -195,8 +236,8 @@ class _AppState extends State<App>{
   }
 
 
-
-  /* контейнер в котором описывается стандарт отображения иконок
+  /* !!!ДОРАБОТАТЬ!!! --> чтобы менялись значки в зависимости от состояния сети
+     контейнер в котором описывается стандарт отображения иконок
      в верхней части экрана, в контейнер передаются значения цвета иконок и
      информация какую именно иконку отображать  */
   Container _iconContainer(Color color, IconData icon){
@@ -210,27 +251,39 @@ class _AppState extends State<App>{
     );
   }
 
-  //ф-ция описывающая кнопку нижнего бара
+  /* !!!!ДОРАБОТАТЬ!!! --> чтобы внутрь передавалась инфа о странице на которую нужно перейти
+      ф-ция описывающая кнопку нижнего бара, в нее передаются все необходимые
+      данные для инициализации и работы кнопки*/
   ElevatedButton _bottomMenuButton(Color color, IconData icon, String label){
     return ElevatedButton(
+      // описывается стиль кнопки
       style: ButtonStyle(
+        // минимальный размер кнопки
         minimumSize: MaterialStateProperty.all<Size>(const Size(100, 75)),
+        // описание фона кнопки в зависимости от состояния
         backgroundColor: MaterialStateProperty.resolveWith<Color>(
           (Set<MaterialState> states) {
+            // если нажата
             if (states.contains(MaterialState.pressed))
               return color.withOpacity(0.75); 
+            // и если не нажата
             return Colors.black.withOpacity(0.15);
           }
         ),
+        // описание цвета наполнения кнопки (текст, иконки), в зависимости от состояния
         foregroundColor: MaterialStateProperty.resolveWith<Color>(
           (Set<MaterialState> states) {
+            // если нажата
             if (states.contains(MaterialState.pressed))
               return Colors.black;
+            // и если не нажата
             return color; // Defer to the widget's default.  
           }
         ),
       ), 
+      // описание для наследников кнопки
       child: Column(
+        // описание дете Column
         children: [
           Icon(
             icon,
@@ -249,6 +302,24 @@ class _AppState extends State<App>{
       ),
       onPressed: () {},
     );
+  }
+
+
+  /* метод для текстового выведения данных о наличии связи с интернетом
+     !!!!ДЛЯ ДЕБАГА!!! */
+  String test() {
+    String string;
+    switch (_currentStates.keys.toList()[0]) {
+      case ConnectivityResult.none:
+        string = "Offline";
+        break;
+      case ConnectivityResult.mobile:
+        string = "Mobile: Online";
+        break;
+      case ConnectivityResult.wifi:
+        string = "WiFi: Online";
+    }
+    return string;
   }
 
 }
