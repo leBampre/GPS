@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:imei_plugin/imei_plugin.dart';
 
 //запуск приложения
 void main() => runApp(App());
@@ -15,12 +16,15 @@ class _AppState extends State<App>{
 
   // описание переменных
   String _currentCoordinates = "no coordinates";  // переменная в которую заносятся текущие координаты
+  String _deviceIMEI = "no IMEI"; // переменная в которую заносится данные о imei устройства
+  
   Timer _timer; // инициализация таймера
   int _commonInquirySec = 5;  // переменная описывающая длительность цикла таймера
 
   // метод вызываемый при запуске приложения
   void initState(){
-    _getCurrentLocation();  
+    _getCurrentLocation();
+    _getDeviceImei(); 
     super.initState();
   }
 
@@ -28,6 +32,16 @@ class _AppState extends State<App>{
   void dispose (){
     _timer.cancel();
     super.dispose();
+  }
+
+  // ф-ция получения имей устройства
+  void _getDeviceImei() async{
+    final imei = await ImeiPlugin.getImei();
+
+    setState(() {
+      _deviceIMEI = "$imei";
+    });
+    print(_deviceIMEI);
   }
 
   // ф-ция определения текущего местоположения
@@ -84,7 +98,7 @@ class _AppState extends State<App>{
 
     // виджет описывающий апп бар
     Widget appBar = Container(
-
+      child: Text(_deviceIMEI),
     );
 
 
@@ -196,7 +210,7 @@ class _AppState extends State<App>{
     );
   }
 
-
+  //ф-ция описывающая кнопку нижнего бара
   ElevatedButton _bottomMenuButton(Color color, IconData icon, String label){
     return ElevatedButton(
       style: ButtonStyle(
