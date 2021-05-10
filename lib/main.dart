@@ -21,6 +21,18 @@ class _AppState extends State<App>{
   /* создаем коллекцию для состояний модулей мобильной связи и wifi для 
     их дальнейшего удобного использования*/
   Map _currentStates = {ConnectivityResult.none:false};
+  // коллекция, храняшая в себе названия необходимых иконок для отображения
+  Map statementIcons = {
+    ConnectivityResult.wifi: Icons.wifi,
+    ConnectivityResult.mobile: Icons.signal_cellular_alt_outlined,
+    ConnectivityResult.none: Icons.signal_cellular_off_outlined,    
+    Icons.place:'GPS is active',
+    Icons.bubble_chart: 'GPS is inactive'
+  };
+  Map _gpsIsActive ={false:'GPS is active'};
+
+
+
   // инициализируем переменную для взаимодействия с синглтоном ConnectionStatusSingleton
   ConnectionStatusSingleton _connectionStatus = ConnectionStatusSingleton.getInstance();
 
@@ -80,6 +92,10 @@ class _AppState extends State<App>{
 
   // ф-ция определения текущего местоположения
   void _getCurrentLocation() async {
+    // проверка, включен ли GPS, затем записываем в string активен ли он (краткая форма записа if-else)
+//    (await Geolocator.isLocationServiceEnabled() == true) ?
+//     setState((){_gpsIsActive[0] = 'GPS is active';}):
+//     setState((){_gpsIsActive[0] = 'GPS is inactive';});
 
     // записываем в переменную position текущую широту и долготу обьекта с указанной точностью
     final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
@@ -181,9 +197,9 @@ class _AppState extends State<App>{
               метод для описания контейнера с иконками, передавая в них данные о 
               желаемом цвете иконки и ее озображении */ 
             children: [
-              _iconContainer(iconsColor, Icons.network_wifi),
-              _iconContainer(iconsColor, Icons.network_cell),
-              _iconContainer(iconsColor, Icons.place),
+              _iconContainer(iconsColor, _currentStates,statementIcons,'keys'),
+              _iconContainer(iconsColor, _gpsIsActive,statementIcons,'values'),
+
             ],
           ),
         ],
@@ -240,7 +256,8 @@ class _AppState extends State<App>{
      контейнер в котором описывается стандарт отображения иконок
      в верхней части экрана, в контейнер передаются значения цвета иконок и
      информация какую именно иконку отображать  */
-  Container _iconContainer(Color color, IconData icon){
+  Container _iconContainer(Color color, Map _switchMap, Map _caseMap, String _type){
+    IconData icon = iconDefinition(_switchMap,_caseMap, _type);
     // после вызова возвращает контейнер с прописанными ниже характеристиками
     return Container(
       padding: EdgeInsets.only(right: 5),
@@ -250,6 +267,24 @@ class _AppState extends State<App>{
       ),      
     );
   }
+
+  IconData iconDefinition(Map _switch, Map _case, String _type){
+    IconData _neededIcon;
+    switch (_type){
+      case 'keys':
+        for(int i = 0; i<_case.length;i++){
+          (_switch.keys.toList()[0] == _case.keys.toList()[i])? _neededIcon = _case.values.toList()[i]:_neededIcon=_neededIcon;
+        }
+        return _neededIcon;
+      case 'values':
+        for(int i = 0; i<_case.length;i++){
+          (_switch.values.toList()[0] == _case.values.toList()[i])? _neededIcon = _case.keys.toList()[i]:_neededIcon=_neededIcon;        
+        }
+    }
+    return _neededIcon;  
+  }
+
+
 
   /* !!!!ДОРАБОТАТЬ!!! --> чтобы внутрь передавалась инфа о странице на которую нужно перейти
       ф-ция описывающая кнопку нижнего бара, в нее передаются все необходимые
