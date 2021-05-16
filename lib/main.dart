@@ -374,13 +374,21 @@ class _AppState extends State<App> {
           borderRadius: BorderRadius.circular(75),
           //color: Colors.green[900],
         ),
-        width: 150,
-        height: 150,
-        child: GestureDetector(
-          onLongPress: () {
-            print('long press');
-          },
-          child: Image.asset('image/alarm.png'),
+        child: InkWell(
+          onLongPress: () {},
+          child: Container(
+            transformAlignment: AlignmentDirectional.center,
+            color: Colors.red,
+            child: Text(
+              "SOS",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 60,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
         ),
       ),
     );
