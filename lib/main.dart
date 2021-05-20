@@ -3,7 +3,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:imei_plugin/imei_plugin.dart';
-import 'package:http/http.dart' as http;
+//import 'package:http/http.dart' as http;
 
 import 'package:holding_app/connection_listener.dart';
 
@@ -113,7 +113,7 @@ class _AppState extends State<App> {
 
     // записываем в string переменную _currentCoordinates координаты, для дальнейшего вывода
     setState(() {
-      _currentCoordinates = "${position.latitude}, ${position.longitude}";
+      _currentCoordinates = "${position.latitude}  ${position.longitude}";
     });
 
     // запуск стандартного такта таймера
