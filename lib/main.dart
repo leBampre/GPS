@@ -3,6 +3,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:imei_plugin/imei_plugin.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:holding_app/connection_listener.dart';
 

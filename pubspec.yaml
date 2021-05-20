@@ -30,6 +30,9 @@ dependencies:
   imei_plugin: ^1.2.0
   #add a plugin to check connection
   connectivity: ^3.0.3
+  #add http plugin
+  http: ^0.13.3
+
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
