@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:imei_plugin/imei_plugin.dart';
 
 import 'package:holding_app/connection_listener.dart';
+import 'package:holding_app/location_listener.dart';
 
 //запуск приложения
 void main() => runApp(App());
@@ -19,6 +19,7 @@ class App extends StatefulWidget {
 /* переопределить этот метод для подкласса,
   чтобы вернуть вновь созданный экземпляр их связанного подкласса */
 class _AppState extends State<App> {
+
   /* создаем коллекцию для состояний модулей мобильной связи и wifi для 
     их дальнейшего удобного использования*/
   Map _currentStates = {ConnectivityResult.none: false};
@@ -27,27 +28,30 @@ class _AppState extends State<App> {
     ConnectivityResult.wifi: Icons.wifi,
     ConnectivityResult.mobile: Icons.signal_cellular_alt_outlined,
     ConnectivityResult.none: Icons.signal_cellular_off_outlined,
-    Icons.place: 'GPS is active',
-    Icons.bubble_chart: 'GPS is inactive'
+    true: Icons.place,
+    false: Icons.bubble_chart,
   };
-  Map _gpsIsActive = {false: 'GPS is active'};
+  Map _gpsIsActive = {false: null};
 
   // инициализируем переменную для взаимодействия с синглтоном ConnectionStatusSingleton
   ConnectionStatusSingleton _connectionStatus =
       ConnectionStatusSingleton.getInstance();
+  
+  LocationSingleton _locationStatus = 
+      LocationSingleton.getInstance();
+  
 
   // инициализиация значение цвета для иконок
   Color iconsColor = Colors.yellowAccent[700];
 
   // описание переменных
-  String _currentCoordinates =
-      "no coordinates"; // переменная в которую заносятся текущие координаты
+  //String _currentCoordinates =
+  //    "no coordinates"; // переменная в которую заносятся текущие координаты
   String _deviceIMEI =
       "no IMEI"; // переменная в которую заносится данные о imei устройства
 
   Timer _timer; // инициализация таймера
-  int _commonInquirySec =
-      5; // переменная описывающая длительность цикла таймера
+ // int _commonInquirySec = 5; // переменная описывающая длительность цикла таймера
 
   // метод вызываемый при запуске этого подкласса в приложении
   @override
@@ -62,8 +66,16 @@ class _AppState extends State<App> {
       setState(() => _currentStates = source);
     });
 
+
+    _locationStatus.initializeLocation();
+
+    _locationStatus.locationChange.listen((event) {
+      setState(() => _gpsIsActive = event);
+    });
+
+
     // запуск метода определения текущего местоположения
-    _getCurrentLocation();
+  //  _getCurrentLocation();
 
     // запуск метода определения imei устройства
     _getDeviceImei();
@@ -73,6 +85,7 @@ class _AppState extends State<App> {
   void dispose() {
     // завершение потока опроса модулей на подключению к интернету
     _connectionStatus.disposeStream();
+    _locationStatus.disposeLocationStream();
 
     // отключение таймера
     _timer.cancel();
@@ -91,7 +104,7 @@ class _AppState extends State<App> {
     // временный вывод переменной в консоль для дебага
     print(_deviceIMEI);
   }
-
+/*
   // ф-ция определения текущего местоположения
   void _getCurrentLocation() async {
     // проверка, включен ли GPS, затем записываем в string активен ли он (краткая форма записа if-else)
@@ -147,14 +160,20 @@ class _AppState extends State<App> {
       }
     });
   }
-
+*/
   //This widget is the root of the app
   @override
   Widget build(BuildContext context) {
     // виджет описывающий апп бар
     Widget appBar = Container(
       // выводится имей, для дебага
-      child: Text(_deviceIMEI),
+      child: Text(
+        'phone ID: $_deviceIMEI',
+        style: TextStyle(
+          color: Colors.yellow,
+          fontSize: 16,
+        ),
+      ),
     );
 
     /* виджет описывающий ряд в котором будут выводиться текущее
@@ -186,11 +205,11 @@ class _AppState extends State<App> {
                     top: 5,
                   ),
                   child: Text(
-                    _currentCoordinates,
+                    _currentCoordinates(_gpsIsActive),
                     style: TextStyle(
                       color: Colors.yellow,
                       fontWeight: FontWeight.w500,
-                      fontSize: 18,
+                      fontSize: 15,
                     ),
                   ),
                 ),
@@ -204,9 +223,9 @@ class _AppState extends State<App> {
               желаемом цвете иконки и ее озображении */
             children: [
               _iconContainer(
-                  iconsColor, _currentStates, statementIcons, 'keys'),
+                  iconsColor, _currentStates, statementIcons),
               _iconContainer(
-                  iconsColor, _gpsIsActive, statementIcons, 'values'),
+                  iconsColor, _gpsIsActive, statementIcons),
             ],
           ),
         ],
@@ -218,7 +237,8 @@ class _AppState extends State<App> {
       // для дебага выводится текст о состояния интернет подключения
       child: Column(
         children: [
-          Text(test()),
+          Text(test(),style: TextStyle(color: Colors.yellow),),
+          Text(testGPS(),style: TextStyle(color: Colors.yellow),),
           Expanded(
             child: Container(),
           ),
@@ -249,24 +269,37 @@ class _AppState extends State<App> {
       home: Scaffold(
         appBar: AppBar(
           title: appBar,
+          backgroundColor: Colors.black,
         ),
-        body: Column(
-          children: [
-            coordinatesAndSatusIcons,
-            /*центральная часть растягивается чтобы занять все незанятое другими
-              виджетами пространство*/
-            Expanded(child: alarmButton),
-            bottomButtons,
-          ],
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('image/fon.jpg'),
+              fit: BoxFit.fill),
+          ),
+          child:Column(
+            children: [
+              coordinatesAndSatusIcons,
+              /*центральная часть растягивается чтобы занять все незанятое другими
+                виджетами пространство*/
+              Expanded(child: alarmButton),
+              bottomButtons,
+            ],
+          ),
         ),
       ),
     );
   }
 
   // иконки верхнего бара
-  Container _iconContainer(
-      Color color, Map _switchMap, Map _caseMap, String _type) {
-    IconData icon = iconDefinition(_switchMap, _caseMap, _type);
+  Container _iconContainer(Color color, Map _switchMap, Map _caseMap) {
+    IconData icon;
+        for (int i = 0; i < _caseMap.length; i++) {
+          (_switchMap.keys.toList()[0] == _caseMap.keys.toList()[i])
+              ? icon = _caseMap.values.toList()[i]
+              : icon = icon;
+        }
+        print(_switchMap.keys.toList()[0]);
     // после вызова возвращает контейнер с прописанными ниже характеристиками
     return Container(
       padding: EdgeInsets.only(right: 5),
@@ -277,24 +310,10 @@ class _AppState extends State<App> {
     );
   }
 
-  IconData iconDefinition(Map _switch, Map _case, String _type) {
-    IconData _neededIcon;
-    switch (_type) {
-      case 'keys':
-        for (int i = 0; i < _case.length; i++) {
-          (_switch.keys.toList()[0] == _case.keys.toList()[i])
-              ? _neededIcon = _case.values.toList()[i]
-              : _neededIcon = _neededIcon;
-        }
-        return _neededIcon;
-      case 'values':
-        for (int i = 0; i < _case.length; i++) {
-          (_switch.values.toList()[0] == _case.values.toList()[i])
-              ? _neededIcon = _case.keys.toList()[i]
-              : _neededIcon = _neededIcon;
-        }
-    }
-    return _neededIcon;
+  String _currentCoordinates(Map _coordinates){
+    final coordinates = _coordinates.values.toList()[0];
+    String currentCoordinates = '$coordinates';
+    return currentCoordinates;
   }
 
   /* !!!!ДОРАБОТАТЬ!!! --> чтобы внутрь передавалась инфа о странице на которую нужно перейти
@@ -366,27 +385,53 @@ class _AppState extends State<App> {
     return string;
   }
 
+  String testGPS(){
+    String string;
+    switch (_gpsIsActive.keys.toList()[0]) {
+    case true:
+      string = "true";
+      break;
+    case false:
+      string = "false";
+      break;
+    }
+    return string;
+  }
+
+
   Container _alarmButtonContainer() {
     return Container(
       child: Container(
-        clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(75),
-          //color: Colors.green[900],
-        ),
+        margin: EdgeInsetsDirectional.only(bottom:40),
+        //color: Colors.blue,
         child: InkWell(
-          onLongPress: () {},
-          child: Container(
-            transformAlignment: AlignmentDirectional.center,
-            color: Colors.red,
-            child: Text(
-              "SOS",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 60,
-                fontWeight: FontWeight.bold,
+          borderRadius: BorderRadius.circular(75),
+          overlayColor: MaterialStateProperty.all(Colors.red[700]),
+          highlightColor: Colors.red[700],
+          enableFeedback: true,
+          onLongPress: () {
+            setState(() {
+
+            });
+          },
+          child: SizedBox(
+            width: 150,
+            height: 150,
+            child:Container(
+              decoration: BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),          
+              padding: EdgeInsetsDirectional.only(top:35,bottom:45),
+              child: Text(
+                "SOS",
+                style: TextStyle(
+                  color: Colors.yellow,
+                  fontSize: 60,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
           ),
         ),
