@@ -31,7 +31,7 @@ dependencies:
   #add a plugin to check connection
   connectivity: ^3.0.3
   #add http plugin
-  http: ^0.13.3
+
 
 
   # The following adds the Cupertino Icons font to your application.
