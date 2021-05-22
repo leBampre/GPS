@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:imei_plugin/imei_plugin.dart';
-//import 'package:http/http.dart' as http;
+import 'package:http/http.dart' as http;
 
 import 'package:holding_app/connection_listener.dart';
 import 'package:holding_app/location_listener.dart';
@@ -24,6 +24,7 @@ class _AppState extends State<App> {
   /* создаем коллекцию для состояний модулей мобильной связи и wifi для 
     их дальнейшего удобного использования*/
   Map _currentStates = {ConnectivityResult.none: false};
+
   // коллекция, храняшая в себе названия необходимых иконок для отображения
   Map statementIcons = {
     ConnectivityResult.wifi: Icons.wifi,
@@ -32,12 +33,16 @@ class _AppState extends State<App> {
     true: Icons.place,
     false: Icons.bubble_chart,
   };
+
+  /* создаем коллекцию для состояний gps модуля для 
+    их дальнейшего удобного использования*/  
   Map _gpsIsActive = {false: null};
 
   // инициализируем переменную для взаимодействия с синглтоном ConnectionStatusSingleton
   ConnectionStatusSingleton _connectionStatus =
       ConnectionStatusSingleton.getInstance();
   
+  // инициализируем переменную для взаимодействия с синглтоном _locationStatus  
   LocationSingleton _locationStatus = 
       LocationSingleton.getInstance();
   
@@ -365,7 +370,7 @@ class _AppState extends State<App> {
           ),
         ],
       ),
-      onPressed: () {},
+      onPressed: httpGet,
     );
   }
 
@@ -438,5 +443,12 @@ class _AppState extends State<App> {
         ),
       ),
     );
+  }
+
+
+  httpGet () async{
+    var response = await http.get(Uri.parse('https://json.flutter.su/echo'));
+    print("Response status: ${response.statusCode}");
+    print("Response body: ${response.body}");
   }
 }
