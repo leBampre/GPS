@@ -32,7 +32,8 @@ dependencies:
   connectivity: ^3.0.3
   #add http plugin
   http: ^0.13.3
-
+  #add provider package
+  provider: ^5.0.0
 
 
   # The following adds the Cupertino Icons font to your application.
