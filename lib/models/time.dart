@@ -12,7 +12,7 @@ class Time with ChangeNotifier {
     _timeForClock = newClockTime;
     _currentTime = newTime;
 
-    print('$_timeForClock, $_currentTime');
+    //print('$_timeForClock, $_currentTime');
     
     notifyListeners();
   }

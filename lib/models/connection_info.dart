@@ -13,7 +13,7 @@ class Connection with ChangeNotifier {
     _connectionState = newConnectionState;
     _internetAvailiability = newInternetActivity;
 
-    print('$_connectionState, $_internetAvailiability');
+    //print('$_connectionState, $_internetAvailiability');
     
     notifyListeners();
   }

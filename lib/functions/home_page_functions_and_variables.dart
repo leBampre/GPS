@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
+//import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
+//import 'package:http/http.dart' as http;
 
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
@@ -64,18 +67,15 @@ class HomePageFunctions {
         borderRadius: BorderRadius.circular(90),
       ),
     ),
-    overlayColor:
-        MaterialStateProperty.all<Color>(Colors.red),
+    overlayColor: MaterialStateProperty.all<Color>(Colors.red),
     backgroundColor:
         MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed))
-        return Colors.red;
+      if (states.contains(MaterialState.pressed)) return Colors.red;
       return Colors.yellow;
     }),
     foregroundColor:
         MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed))
-        return Colors.white;
+      if (states.contains(MaterialState.pressed)) return Colors.white;
       return Colors.black;
     }),
   );
@@ -219,4 +219,82 @@ class HomePageFunctions {
       ],
     );
   }
+
+  Future<void> apiRequest() async {
+    String url = 'http://77.123.137.100:20332';
+    String data = '#L#358240051111110;NA\r\n';
+    print(data);
+
+    HttpClient httpClient = new HttpClient();
+    print(2);
+    httpClient.postUrl(Uri.parse(url)).then((HttpClientRequest request) {
+      print(3);
+      request.write(utf8.encode(data));
+      print(4);
+      return request.close();
+    }).then((HttpClientResponse response) {
+      print(5);
+      String z = response.toString();
+      print(z);
+    });
+    print(6);
+  }
+
+  //!!!!!!!!!!!!!
+/*
+  Future<http.Response> httpPost(BuildContext context) async {
+    //String url = 'https://json.flutter.su/echo';
+    String url = 'https://77.123.137.100:20332';
+/*
+    Map data = {
+      "host": "193.193.165.37",
+      "port": "26759",
+      "unitId": "358240051111110",
+      "password": "111",
+    };
+*/
+    String data = '#L#358240051111110;NA';
+    print(data);
+    //var body = jsonEncode(data);
+
+    //var z = jsonDecode(body);
+    //print(z);
+
+    var sendData = await http.post(
+      Uri.parse(url),
+      //headers: {'Contant-type': 'application/json'},
+      body: data,
+    );
+
+    print('Ну хеллоу');
+    print("${sendData.statusCode}");
+    log("${sendData.body}");
+    return sendData;
+  }
+
+  Future<void> httpPost2(BuildContext context) async {
+    //String url = 'https://json.flutter.su/echo';
+    String url = 'https://77.123.137.100:20332';
+
+    String data = '#SD#010721;142030;5355.09260;N;02732.40990;E;0;0;300;7';
+    print(data);
+    //var body = jsonEncode(data);
+
+    //var z = jsonDecode(body);
+    //print(z);
+
+    var sendData = await http.post(
+      Uri.parse(url),
+      //headers: {'Contant-type': 'application/json'},
+      body: data,
+    );
+    log("${sendData.body}");
+  }
+
+  Future<void> getCallback(BuildContext context) async {
+    String url = 'https://77.123.137.100:20332';
+    var getressponse = await http.get(Uri.parse(url));
+    print(getressponse);
+  }
+*/
 }

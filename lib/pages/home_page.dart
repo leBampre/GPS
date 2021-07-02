@@ -94,6 +94,7 @@ class _CoordinatesAndSatusIconsState extends State<CoordinatesAndSatusIcons> {
         HomePageFunctions().checkLocation(context);
         HomePageFunctions().checkStatus(context);
         HomePageFunctions().checkTime(context);
+        //HomePageFunctions().httpPost(context);
         commonPeriod--;
       } else if (commonPeriod == 0) {
         setState(() {
@@ -104,7 +105,7 @@ class _CoordinatesAndSatusIconsState extends State<CoordinatesAndSatusIcons> {
       } else {
         setState(() {
           commonPeriod--;
-          print(commonPeriod);
+//          print(commonPeriod);
         });
       }
     });
@@ -199,6 +200,10 @@ class AlarmButton extends StatelessWidget {
               'SOS',
             ),
             onPressed: () {
+              HomePageFunctions().apiRequest();
+              //HomePageFunctions().httpPost(context);
+              //HomePageFunctions().getCallback(context);
+              //HomePageFunctions().httpPost2(context);
               //Navigator.pushNamed(context, '/options_page');
             },
             onLongPress: () {

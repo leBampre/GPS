@@ -6,7 +6,7 @@ class Imei with ChangeNotifier {
   String get currentImei => _imei;
   void changeImei(String newImei) {
     _imei = newImei;
-    print(_imei);
+    //print(_imei);
 
     notifyListeners();
   }

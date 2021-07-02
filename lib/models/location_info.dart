@@ -11,7 +11,7 @@ class LocationInfo with ChangeNotifier {
     _location = 'lat: $newLatitude, long: $newLongitude';
     _gpsIsActive = newGPSStatus;
 
-    print('$_location, gps is: $_gpsIsActive');
+    //print('$_location, gps is: $_gpsIsActive');
 
     notifyListeners();
   }
