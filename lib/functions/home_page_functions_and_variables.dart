@@ -223,14 +223,17 @@ class HomePageFunctions {
   Future<void> apiRequest() async {
     String url = 'http://77.123.137.100:20332';
     String data = '#L#358240051111110;NA\r\n';
+    String info = '#SD#030721;154602;5555.09260;N;02232.40990;E;0;0;300;7\r\n';
     print(data);
 
     HttpClient httpClient = new HttpClient();
     print(2);
     httpClient.postUrl(Uri.parse(url)).then((HttpClientRequest request) {
       print(3);
-      request.write(utf8.encode(data));
+      request.add(utf8.encode(data));
       print(4);
+      request.add(utf8.encode(info));
+      print(info);
       return request.close();
     }).then((HttpClientResponse response) {
       print(5);
