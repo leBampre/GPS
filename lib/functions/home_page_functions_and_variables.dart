@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 //import 'package:http/http.dart' as http;
+//import 'package:http/http.dart';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,6 +12,7 @@ import 'package:holding_app/models/connection_info.dart';
 import 'package:holding_app/models/imei.dart';
 import 'package:holding_app/models/location_info.dart';
 import 'package:holding_app/models/time.dart';
+
 import 'package:imei_plugin/imei_plugin.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
@@ -220,26 +222,59 @@ class HomePageFunctions {
     );
   }
 
-  Future<void> apiRequest() async {
-    String url = 'http://77.123.137.100:20332';
-    String data = '#L#358240051111110;NA\r\n';
-    print(data);
+  Future<String> apiRequest() async {
+    String url = 'http://193.193.165.37:26583';
+    String loginData = '#L#358240051111110;NA\r\n';
+    String phoneInfo =
+        '#SD#060721;100158;5355.09260;N;02732.40990;E;0;0;300;7\r\n';
+    print(loginData);
+    print(phoneInfo);
 
     HttpClient httpClient = new HttpClient();
     print(2);
-    httpClient.postUrl(Uri.parse(url)).then((HttpClientRequest request) {
-      print(3);
-      request.write(utf8.encode(data));
-      print(4);
-      return request.close();
-    }).then((HttpClientResponse response) {
-      print(5);
-      String z = response.toString();
-      print(z);
-    });
+
+    HttpClientRequest request = await httpClient.postUrl(Uri.parse(url));
+    print(3);
+    request.add(utf8.encode(loginData));
+    print(4);
+    request.add(utf8.encode(phoneInfo));
+    print(5);
+    HttpClientResponse response = await request.close();
     print(6);
+    String reply = await response.transform(utf8.decoder).join();
+    print(7);
+    httpClient.close();
+    print(8);
+    return reply;
   }
 
+/*
+  Future<void> apiRequest() async {
+    String url = 'http://193.193.165.37:26583';
+    String loginData = '#L#358240051111110;NA\r\n';
+    String phoneInfo =
+        '#SD#060721;100158;5355.09260;N;02732.40990;E;0;0;300;7\r\n';
+    print(loginData);
+    print(phoneInfo);
+
+    try {
+      HttpClient httpClient = new HttpClient();
+      print(2);
+
+      httpClient.postUrl(Uri.parse(url)).then((HttpClientRequest request) {
+        print(3);
+        request.add(utf8.encode(loginData));
+        print(4);
+        request.add(utf8.encode(phoneInfo));
+        print(5);
+        return request.close();
+      });
+      print(7);
+    } catch (er) {
+      print(er);
+    }
+  }
+*/
   //!!!!!!!!!!!!!
 /*
   Future<http.Response> httpPost(BuildContext context) async {
