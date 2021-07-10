@@ -3,6 +3,7 @@ import 'dart:convert';
 //import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 //import 'package:http/http.dart' as http;
 //import 'package:http/http.dart';
 
@@ -12,6 +13,7 @@ import 'package:holding_app/models/connection_info.dart';
 import 'package:holding_app/models/imei.dart';
 import 'package:holding_app/models/location_info.dart';
 import 'package:holding_app/models/time.dart';
+import 'package:holding_app/config/global.dart' as global;
 
 import 'package:imei_plugin/imei_plugin.dart';
 import 'package:location/location.dart';
@@ -170,16 +172,22 @@ class HomePageFunctions {
   }
 
   //  метод описывающий получение текущего времени
-  Future<void> checkTime(BuildContext context) async {
+  Future<void> checkTimeAndDate(BuildContext context) async {
     //final currentTime = DateTime.now();
     dynamic hour = checkDoubleCounting(DateTime.now().hour);
     dynamic minute = checkDoubleCounting(DateTime.now().minute);
     dynamic second = checkDoubleCounting(DateTime.now().second);
+    dynamic day = checkDoubleCounting(DateTime.now().day);
+    dynamic month = checkDoubleCounting(DateTime.now().month);
+    dynamic year = checkDoubleCounting(DateTime.now().year);
+
+    String cutYear = '$year';
 
     String clockTime = '$hour:$minute';
     String currentTime = '$hour$minute$second';
+    String currentDate = '$day$month${cutYear.substring(2)}';
 
-    context.read<Time>().changedTime(clockTime, currentTime);
+    context.read<Time>().changedTime(clockTime, currentTime, currentDate);
   }
 
   /*  метод описывающий проверку является ли какая-то часть полученнного времени
@@ -222,114 +230,32 @@ class HomePageFunctions {
     );
   }
 
-  Future<String> apiRequest() async {
-    String url = 'http://193.193.165.37:26583';
-    String loginData = '#L#358240051111110;NA\r\n';
+  // метод для связи с сокетом и отправки данных
+  Future<void> socketConnect() async {
+    String loginData = '#L#${global.imei};NA\r\n';
     String phoneInfo =
-        '#SD#060721;100158;5355.09260;N;02732.40990;E;0;0;300;7\r\n';
+        '#SD#${global.date};${global.time};5355.09260;N;02732.40990;E;0;0;300;7\r\n';
+    String serversResponse;
+
+    Socket socket = await Socket.connect('193.193.165.37', 26583);
+    print(1);
+
+    socket.add(utf8.encode(loginData));
     print(loginData);
+
+    socket.listen((List<int> event) {
+      serversResponse = utf8.decode(event);
+    });
+    await Future.delayed(Duration(seconds: 3));
+    print(serversResponse);
+    socket.add(utf8.encode(phoneInfo));
     print(phoneInfo);
 
-    HttpClient httpClient = new HttpClient();
-    print(2);
-
-    HttpClientRequest request = await httpClient.postUrl(Uri.parse(url));
-    print(3);
-    request.add(utf8.encode(loginData));
-    print(4);
-    request.add(utf8.encode(phoneInfo));
+    await Future.delayed(Duration(seconds: 15));
     print(5);
-    HttpClientResponse response = await request.close();
+
+    socket.close();
     print(6);
-    String reply = await response.transform(utf8.decoder).join();
-    print(7);
-    httpClient.close();
-    print(8);
-    return reply;
   }
 
-/*
-  Future<void> apiRequest() async {
-    String url = 'http://193.193.165.37:26583';
-    String loginData = '#L#358240051111110;NA\r\n';
-    String phoneInfo =
-        '#SD#060721;100158;5355.09260;N;02732.40990;E;0;0;300;7\r\n';
-    print(loginData);
-    print(phoneInfo);
-
-    try {
-      HttpClient httpClient = new HttpClient();
-      print(2);
-
-      httpClient.postUrl(Uri.parse(url)).then((HttpClientRequest request) {
-        print(3);
-        request.add(utf8.encode(loginData));
-        print(4);
-        request.add(utf8.encode(phoneInfo));
-        print(5);
-        return request.close();
-      });
-      print(7);
-    } catch (er) {
-      print(er);
-    }
-  }
-*/
-  //!!!!!!!!!!!!!
-/*
-  Future<http.Response> httpPost(BuildContext context) async {
-    //String url = 'https://json.flutter.su/echo';
-    String url = 'https://77.123.137.100:20332';
-/*
-    Map data = {
-      "host": "193.193.165.37",
-      "port": "26759",
-      "unitId": "358240051111110",
-      "password": "111",
-    };
-*/
-    String data = '#L#358240051111110;NA';
-    print(data);
-    //var body = jsonEncode(data);
-
-    //var z = jsonDecode(body);
-    //print(z);
-
-    var sendData = await http.post(
-      Uri.parse(url),
-      //headers: {'Contant-type': 'application/json'},
-      body: data,
-    );
-
-    print('Ну хеллоу');
-    print("${sendData.statusCode}");
-    log("${sendData.body}");
-    return sendData;
-  }
-
-  Future<void> httpPost2(BuildContext context) async {
-    //String url = 'https://json.flutter.su/echo';
-    String url = 'https://77.123.137.100:20332';
-
-    String data = '#SD#010721;142030;5355.09260;N;02732.40990;E;0;0;300;7';
-    print(data);
-    //var body = jsonEncode(data);
-
-    //var z = jsonDecode(body);
-    //print(z);
-
-    var sendData = await http.post(
-      Uri.parse(url),
-      //headers: {'Contant-type': 'application/json'},
-      body: data,
-    );
-    log("${sendData.body}");
-  }
-
-  Future<void> getCallback(BuildContext context) async {
-    String url = 'https://77.123.137.100:20332';
-    var getressponse = await http.get(Uri.parse(url));
-    print(getressponse);
-  }
-*/
 }

@@ -93,7 +93,7 @@ class _CoordinatesAndSatusIconsState extends State<CoordinatesAndSatusIcons> {
       if (commonPeriod == 10) {
         HomePageFunctions().checkLocation(context);
         HomePageFunctions().checkStatus(context);
-        HomePageFunctions().checkTime(context);
+        HomePageFunctions().checkTimeAndDate(context);
         //HomePageFunctions().httpPost(context);
         commonPeriod--;
       } else if (commonPeriod == 0) {
@@ -186,7 +186,12 @@ class _CoordinatesAndSatusIconsState extends State<CoordinatesAndSatusIcons> {
 }
 
 // виджет с тревожной кнопкой
-class AlarmButton extends StatelessWidget {
+class AlarmButton extends StatefulWidget {
+  @override
+  _AlarmButtonState createState() => _AlarmButtonState();
+}
+
+class _AlarmButtonState extends State<AlarmButton> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -200,7 +205,7 @@ class AlarmButton extends StatelessWidget {
               'SOS',
             ),
             onPressed: () {
-              HomePageFunctions().apiRequest();
+              HomePageFunctions().socketConnect();
               //HomePageFunctions().httpPost(context);
               //HomePageFunctions().getCallback(context);
               //HomePageFunctions().httpPost2(context);

@@ -1,19 +1,18 @@
 import 'package:flutter/widgets.dart';
+import 'package:holding_app/config/global.dart' as global;
 
 class Time with ChangeNotifier {
-
-  dynamic _currentTime;
   dynamic _timeForClock;
 
-  dynamic get currentTime => _currentTime;
   dynamic get timeForClock => _timeForClock;
 
-  void changedTime(newClockTime, newTime) {
+  void changedTime(newClockTime, newTime, newDate) {
     _timeForClock = newClockTime;
-    _currentTime = newTime;
-
     //print('$_timeForClock, $_currentTime');
+    global.time = newTime;
     
+    global.date = newDate;
+
     notifyListeners();
   }
 }
