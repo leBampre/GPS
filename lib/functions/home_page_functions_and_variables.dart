@@ -1,11 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-//import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-//import 'package:http/http.dart' as http;
-//import 'package:http/http.dart';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
@@ -234,28 +230,32 @@ class HomePageFunctions {
   Future<void> socketConnect() async {
     String loginData = '#L#${global.imei};NA\r\n';
     String phoneInfo =
-        '#SD#${global.date};${global.time};5355.09260;N;02732.40990;E;0;0;300;7\r\n';
-    String serversResponse;
+        '#D#${global.date};${global.time};${global.latitude};N;${global.longitude};E;0;0;300;7;NA;0;0;;NA;SOS:1:${global.sos}\r\n';
 
+    String serversResponse;
+    global.mess = phoneInfo;
+    global.check = 2;
     Socket socket = await Socket.connect('193.193.165.37', 26583);
-    print(1);
 
     socket.add(utf8.encode(loginData));
     print(loginData);
 
     socket.listen((List<int> event) {
       serversResponse = utf8.decode(event);
+      global.answer = serversResponse;
     });
-    await Future.delayed(Duration(seconds: 3));
+
+    await Future.delayed(Duration(seconds: 1));
     print(serversResponse);
     socket.add(utf8.encode(phoneInfo));
     print(phoneInfo);
 
-    await Future.delayed(Duration(seconds: 15));
-    print(5);
+    (global.sos == 0)
+        ? await Future.delayed(Duration(seconds: 28))
+        : await Future.delayed(Duration(seconds: 1));
+    print(serversResponse);
+    global.answer = serversResponse;
 
     socket.close();
-    print(6);
   }
-
 }

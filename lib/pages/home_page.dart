@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:holding_app/models/imei.dart';
-//import 'package:http/http.dart';
 import 'package:provider/provider.dart';
-//import 'package:connectivity/connectivity.dart';
 
 import 'package:holding_app/models/time.dart';
 import 'package:holding_app/models/location_info.dart';
 import 'package:holding_app/models/connection_info.dart';
+import 'package:holding_app/config/global.dart' as global;
 
 import 'package:holding_app/functions/home_page_functions_and_variables.dart';
 
@@ -90,15 +89,19 @@ class _CoordinatesAndSatusIconsState extends State<CoordinatesAndSatusIcons> {
   void checkingTimer() {
     // создаем конкретный обьект таймера и задаем параметры его работы
     checkingPeriod = new Timer.periodic(oneSec, (Timer timer) {
-      if (commonPeriod == 10) {
+      if (commonPeriod == 30) {
         HomePageFunctions().checkLocation(context);
         HomePageFunctions().checkStatus(context);
         HomePageFunctions().checkTimeAndDate(context);
-        //HomePageFunctions().httpPost(context);
+        global.check = 1;
+        HomePageFunctions().socketConnect();
+        global.check = 4;
         commonPeriod--;
+        global.timer = commonPeriod;
+        print(commonPeriod);
       } else if (commonPeriod == 0) {
         setState(() {
-          commonPeriod = 10;
+          commonPeriod = 30;
           checkingTimer();
           checkingPeriod.cancel();
         });
@@ -186,6 +189,7 @@ class _CoordinatesAndSatusIconsState extends State<CoordinatesAndSatusIcons> {
 }
 
 // виджет с тревожной кнопкой
+
 class AlarmButton extends StatefulWidget {
   @override
   _AlarmButtonState createState() => _AlarmButtonState();
@@ -196,7 +200,28 @@ class _AlarmButtonState extends State<AlarmButton> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(child: Container()),
+        Expanded(
+            child: Container(
+                child: Column(
+          children: [
+            Text(
+              global.mess,
+              style: TextStyle(color: Colors.yellow, fontSize: 5),
+            ),
+            Text(
+              global.answer,
+              style: TextStyle(color: Colors.yellow, fontSize: 5),
+            ),
+            Text(
+              '${global.check}',
+              style: TextStyle(color: Colors.yellow, fontSize: 20),
+            ),
+            Text(
+              '${global.timer}',
+              style: TextStyle(color: Colors.yellow, fontSize: 5),
+            ),
+          ],
+        ))),
         Container(
           padding: EdgeInsets.only(bottom: 25),
           child: ElevatedButton(
@@ -205,14 +230,12 @@ class _AlarmButtonState extends State<AlarmButton> {
               'SOS',
             ),
             onPressed: () {
-              HomePageFunctions().socketConnect();
-              //HomePageFunctions().httpPost(context);
-              //HomePageFunctions().getCallback(context);
-              //HomePageFunctions().httpPost2(context);
-              //Navigator.pushNamed(context, '/options_page');
+              print('keep pressing');
             },
             onLongPress: () {
-              //Navigator.pushNamed(context, '/options_page');
+              global.sos = 1;
+              HomePageFunctions().socketConnect();
+              global.sos = 0;
             },
           ),
         ),

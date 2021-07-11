@@ -32,7 +32,6 @@ dependencies:
   connectivity: ^3.0.3
   #add http plugin
   http: ^0.13.3
-  web_socket_channel: ^2.1.0
   #add provider package
   provider: ^5.0.0
 
