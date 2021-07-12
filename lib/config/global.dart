@@ -2,7 +2,7 @@ library holding_app.global;
 
 //!! библиотека глобальных переменныъ проекта
 
-String imei = ' ';
+String serialNumber = ' ';
 String time = ' ';
 String date = ' ';
 String longitude = ' ';

@@ -26,8 +26,8 @@ dependencies:
   
   #add a geolocator plugin
   location: ^4.1.1
-  #add a Imei checker plugin
-  imei_plugin: ^1.2.0
+  #add a plugin for checking serial number
+  device_info_plus: ^2.1.0
   #add a plugin to check connection
   connectivity: ^3.0.3
   #add http plugin

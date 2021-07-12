@@ -28,7 +28,6 @@ class LocationInfo with ChangeNotifier {
     double convertedMins = double.parse(mins) * 60;
     (convertedMins < 10)?mins = '0'+convertedMins.toStringAsFixed(5):mins = convertedMins.toStringAsFixed(5);
     (isLongitude == true)?minsAndSecs = '0'+values[0] + mins:minsAndSecs = values[0] + mins;
-    print(minsAndSecs);
     return minsAndSecs;
   }
 }

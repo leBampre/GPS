@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:holding_app/models/imei.dart';
+import 'package:holding_app/models/serial_number.dart';
 import 'package:provider/provider.dart';
 
 import 'package:holding_app/models/time.dart';
@@ -78,7 +78,7 @@ class _CoordinatesAndSatusIconsState extends State<CoordinatesAndSatusIcons> {
 
   void initState() {
     super.initState();
-    HomePageFunctions().getImei(context);
+    HomePageFunctions().getSerial(context);
     checkingTimer();
   }
 
@@ -93,12 +93,8 @@ class _CoordinatesAndSatusIconsState extends State<CoordinatesAndSatusIcons> {
         HomePageFunctions().checkLocation(context);
         HomePageFunctions().checkStatus(context);
         HomePageFunctions().checkTimeAndDate(context);
-        global.check = 1;
         HomePageFunctions().socketConnect();
-        global.check = 4;
         commonPeriod--;
-        global.timer = commonPeriod;
-        print(commonPeriod);
       } else if (commonPeriod == 0) {
         setState(() {
           commonPeriod = 30;
@@ -143,9 +139,9 @@ class _CoordinatesAndSatusIconsState extends State<CoordinatesAndSatusIcons> {
                 ),
                 Container(
                   padding: HomePageFunctions().topBarContainersPaddings,
-                  child: Consumer<Imei>(builder: (context, imei, child) {
+                  child: Consumer<SN>(builder: (context, imei, child) {
                     return Text(
-                      '${context.watch<Imei>().currentImei}',
+                      '${context.watch<SN>().currentSN}',
                       style: HomePageFunctions().topBarText,
                     );
                   }),
@@ -201,27 +197,7 @@ class _AlarmButtonState extends State<AlarmButton> {
     return Column(
       children: [
         Expanded(
-            child: Container(
-                child: Column(
-          children: [
-            Text(
-              global.mess,
-              style: TextStyle(color: Colors.yellow, fontSize: 5),
-            ),
-            Text(
-              global.answer,
-              style: TextStyle(color: Colors.yellow, fontSize: 5),
-            ),
-            Text(
-              '${global.check}',
-              style: TextStyle(color: Colors.yellow, fontSize: 20),
-            ),
-            Text(
-              '${global.timer}',
-              style: TextStyle(color: Colors.yellow, fontSize: 5),
-            ),
-          ],
-        ))),
+            child: Container()),
         Container(
           padding: EdgeInsets.only(bottom: 25),
           child: ElevatedButton(
@@ -230,7 +206,6 @@ class _AlarmButtonState extends State<AlarmButton> {
               'SOS',
             ),
             onPressed: () {
-              print('keep pressing');
             },
             onLongPress: () {
               global.sos = 1;

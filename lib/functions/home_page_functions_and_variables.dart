@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:holding_app/models/connection_info.dart';
-import 'package:holding_app/models/imei.dart';
+import 'package:holding_app/models/serial_number.dart';
 import 'package:holding_app/models/location_info.dart';
 import 'package:holding_app/models/time.dart';
 import 'package:holding_app/config/global.dart' as global;
 
-import 'package:imei_plugin/imei_plugin.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 
@@ -115,10 +115,19 @@ class HomePageFunctions {
 
   //! Методы страницы home_page.dart
 
-  //  метод описывающий получение и передачу imei через провайдер
-  Future<void> getImei(BuildContext context) async {
-    final getImei = await ImeiPlugin.getImei();
-    context.read<Imei>().changeImei(getImei);
+  //  метод описывающий получение и передачу serial number через провайдер
+  Future<void> getSerial(BuildContext context) async {
+    var deviceInfo = DeviceInfoPlugin();
+    var deviceSN;
+    if (Platform.isIOS == true) {
+      var deviceType = await deviceInfo.iosInfo;
+      deviceSN = deviceType.identifierForVendor;
+    } else {
+      var deviceType = await deviceInfo.androidInfo;
+      deviceSN = deviceType.androidId;
+    }
+    deviceSN = deviceSN.toString();
+    context.read<SN>().changeSN(deviceSN);
   }
 
   //  метод описывающий тест, который проверяет есть ли доступ к интернету
@@ -228,33 +237,27 @@ class HomePageFunctions {
 
   // метод для связи с сокетом и отправки данных
   Future<void> socketConnect() async {
-    String loginData = '#L#${global.imei};NA\r\n';
+    String loginData = '#L#${global.serialNumber};NA\r\n';
     String phoneInfo =
         '#D#${global.date};${global.time};${global.latitude};N;${global.longitude};E;0;0;300;7;NA;0;0;;NA;SOS:1:${global.sos}\r\n';
 
     String serversResponse;
-    global.mess = phoneInfo;
-    global.check = 2;
     Socket socket = await Socket.connect('193.193.165.37', 26583);
 
     socket.add(utf8.encode(loginData));
-    print(loginData);
 
     socket.listen((List<int> event) {
       serversResponse = utf8.decode(event);
-      global.answer = serversResponse;
     });
 
     await Future.delayed(Duration(seconds: 1));
-    print(serversResponse);
-    socket.add(utf8.encode(phoneInfo));
-    print(phoneInfo);
+    (serversResponse == '#AL#1\r\n')
+        ? socket.add(utf8.encode(phoneInfo))
+        : socket.add(utf8.encode(phoneInfo));
 
     (global.sos == 0)
         ? await Future.delayed(Duration(seconds: 28))
         : await Future.delayed(Duration(seconds: 1));
-    print(serversResponse);
-    global.answer = serversResponse;
 
     socket.close();
   }
