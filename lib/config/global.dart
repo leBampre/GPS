@@ -7,10 +7,10 @@ String time = ' ';
 String date = ' ';
 String longitude = ' ';
 String latitude = ' ';
+String speed = ' ';
+String altitude = ' ';
+String heading = ' ';
 bool internetIsActive = false;
 int sos = 0;
 
-String answer = '';
-String mess = '';
-int check = 0;
-int timer = 0;
+int timerPeriod = 15;

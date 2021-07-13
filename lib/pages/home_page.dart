@@ -89,7 +89,7 @@ class _CoordinatesAndSatusIconsState extends State<CoordinatesAndSatusIcons> {
   void checkingTimer() {
     // создаем конкретный обьект таймера и задаем параметры его работы
     checkingPeriod = new Timer.periodic(oneSec, (Timer timer) {
-      if (commonPeriod == 30) {
+      if (commonPeriod == global.timerPeriod) {
         HomePageFunctions().checkLocation(context);
         HomePageFunctions().checkStatus(context);
         HomePageFunctions().checkTimeAndDate(context);
@@ -97,7 +97,7 @@ class _CoordinatesAndSatusIconsState extends State<CoordinatesAndSatusIcons> {
         commonPeriod--;
       } else if (commonPeriod == 0) {
         setState(() {
-          commonPeriod = 30;
+          commonPeriod = global.timerPeriod;
           checkingTimer();
           checkingPeriod.cancel();
         });

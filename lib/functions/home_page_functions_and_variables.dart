@@ -170,26 +170,29 @@ class HomePageFunctions {
     LocationData newLocation = await location.getLocation();
     dynamic newLat = newLocation.latitude;
     dynamic newLong = newLocation.longitude;
+    dynamic newSpeed = newLocation.speed;
+    dynamic newAltitude = newLocation.altitude;
+    dynamic newHeading = newLocation.heading;
 
-    context
-        .read<LocationInfo>()
-        .changeLocationandGPSActivity(newLat, newLong, newGPSStatus);
+    context.read<LocationInfo>().changeLocationandGPSActivity(
+        newLat, newLong, newSpeed, newAltitude, newHeading, newGPSStatus);
   }
 
   //  метод описывающий получение текущего времени
   Future<void> checkTimeAndDate(BuildContext context) async {
     //final currentTime = DateTime.now();
     dynamic hour = checkDoubleCounting(DateTime.now().hour);
+    dynamic clockHour = checkDoubleCounting(DateTime.now().toUtc().hour);
     dynamic minute = checkDoubleCounting(DateTime.now().minute);
     dynamic second = checkDoubleCounting(DateTime.now().second);
-    dynamic day = checkDoubleCounting(DateTime.now().day);
+    dynamic day = checkDoubleCounting(DateTime.now().toUtc().day);
     dynamic month = checkDoubleCounting(DateTime.now().month);
     dynamic year = checkDoubleCounting(DateTime.now().year);
 
     String cutYear = '$year';
 
     String clockTime = '$hour:$minute';
-    String currentTime = '$hour$minute$second';
+    String currentTime = '$clockHour$minute$second';
     String currentDate = '$day$month${cutYear.substring(2)}';
 
     context.read<Time>().changedTime(clockTime, currentTime, currentDate);
@@ -239,7 +242,7 @@ class HomePageFunctions {
   Future<void> socketConnect() async {
     String loginData = '#L#${global.serialNumber};NA\r\n';
     String phoneInfo =
-        '#D#${global.date};${global.time};${global.latitude};N;${global.longitude};E;0;0;300;7;NA;0;0;;NA;SOS:1:${global.sos}\r\n';
+        '#D#${global.date};${global.time};${global.latitude};N;${global.longitude};E;${global.speed};${global.heading};${global.altitude};7;NA;0;0;;NA;SOS:1:${global.sos}\r\n';
 
     String serversResponse;
     Socket socket = await Socket.connect('193.193.165.37', 26583);
@@ -256,7 +259,7 @@ class HomePageFunctions {
         : socket.add(utf8.encode(phoneInfo));
 
     (global.sos == 0)
-        ? await Future.delayed(Duration(seconds: 28))
+        ? await Future.delayed(Duration(seconds: global.timerPeriod - 2))
         : await Future.delayed(Duration(seconds: 1));
 
     socket.close();
