@@ -52,8 +52,7 @@ class HomePageBody extends StatelessWidget {
     return Container(
       child: Column(
         children: [
-          CoordinatesAndSatusIcons(),
-          Expanded(child: AlarmButton()),
+          Expanded(child: CoordinatesAndSatusIconsAndAlarmButton()),
           BottomButtons(),
         ],
       ),
@@ -61,19 +60,19 @@ class HomePageBody extends StatelessWidget {
   }
 }
 
-// виджет описывающий индикационные иконки
-class CoordinatesAndSatusIcons extends StatefulWidget {
+// виджет описывающий индикационные иконки и тревожную кнопку
+class CoordinatesAndSatusIconsAndAlarmButton extends StatefulWidget {
   @override
-  _CoordinatesAndSatusIconsState createState() =>
-      _CoordinatesAndSatusIconsState();
+  _CoordinatesAndSatusIconsAndAlarmButton createState() =>
+      _CoordinatesAndSatusIconsAndAlarmButton();
 }
 
-class _CoordinatesAndSatusIconsState extends State<CoordinatesAndSatusIcons> {
+class _CoordinatesAndSatusIconsAndAlarmButton extends State<CoordinatesAndSatusIconsAndAlarmButton> {
   // коллекция, храняшая в себе названия необходимых иконок для отображения
   Map statementIcons = HomePageFunctions().statementIcons;
 
   Timer checkingPeriod;
-  int commonPeriod = 10;
+  int commonPeriod = global.timerPeriod;
   static const oneSec = const Duration(seconds: 1);
 
   void initState() {
@@ -112,108 +111,100 @@ class _CoordinatesAndSatusIconsState extends State<CoordinatesAndSatusIcons> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // инициализируем внутри контейнера наследника Row
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        // описываем детей Row
-        children: [
-          /* помещение столбца в Expanded виджет, который растягивает столбец,
-                чтобы использовать все оставшееся свободное место в строке */
-          Expanded(
-            // описываем первого ребенка Row - Column
-            child: Column(
-              // задаем расположение детей внутри Column
-              crossAxisAlignment: CrossAxisAlignment.start,
-              // описываем детей Column
-              children: [
-                Container(
-                  padding: HomePageFunctions().topBarContainersPaddings,
-                  child: Consumer<LocationInfo>(
-                      builder: (context, connection, child) {
-                    return Text(
-                      '${context.watch<LocationInfo>().getLocation}',
-                      style: HomePageFunctions().topBarText,
-                    );
-                  }),
-                ),
-                Container(
-                  padding: HomePageFunctions().topBarContainersPaddings,
-                  child: Consumer<SN>(builder: (context, imei, child) {
-                    return Text(
-                      '${context.watch<SN>().currentSN}',
-                      style: HomePageFunctions().topBarText,
-                    );
-                  }),
-                ),
-              ],
-            ),
-          ),
-          // описываем 2го ребенка Row - Row с иконками
-          Row(
-            /* описываем детей Row вызывая для каждого созданный стандартизированый
-                    метод для описания контейнера с иконками, передавая в них данные о 
-                    желаемом цвете иконки и ее озображении */
-            children: [
-              Container(
-                child:
-                    Consumer<Connection>(builder: (context, connection, child) {
-                  return Icon(
-                    HomePageFunctions().topBarIcon(statementIcons,
-                        context.watch<Connection>().getConnectionState),
-                    color: Colors.yellow,
-                  );
-                }),
-              ),
-              Container(
-                child:
-                    Consumer<LocationInfo>(builder: (context, location, child) {
-                  return Icon(
-                    HomePageFunctions().topBarIcon(statementIcons,
-                        context.watch<LocationInfo>().getGPSState),
-                    color: Colors.yellow,
-                  );
-                }),
-              ),
-              // _iconContainer(iconsColor, _gpsIsActive, statementIcons),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// виджет с тревожной кнопкой
-
-class AlarmButton extends StatefulWidget {
-  @override
-  _AlarmButtonState createState() => _AlarmButtonState();
-}
-
-class _AlarmButtonState extends State<AlarmButton> {
-  @override
-  Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(
-            child: Container()),
         Container(
-          padding: EdgeInsets.only(bottom: 25),
-          child: ElevatedButton(
-            style: HomePageFunctions().sosButtonStyle,
-            child: Text(
-              'SOS',
-            ),
-            onPressed: () {
-            },
-            onLongPress: () {
-              global.sos = 1;
-              HomePageFunctions().socketConnect();
-              global.sos = 0;
-            },
+          // инициализируем внутри контейнера наследника Row
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            // описываем детей Row
+            children: [
+              /* помещение столбца в Expanded виджет, который растягивает столбец,
+                    чтобы использовать все оставшееся свободное место в строке */
+              Expanded(
+                // описываем первого ребенка Row - Column
+                child: Column(
+                  // задаем расположение детей внутри Column
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  // описываем детей Column
+                  children: [
+                    Container(
+                      padding: HomePageFunctions().topBarContainersPaddings,
+                      child: Consumer<LocationInfo>(
+                          builder: (context, connection, child) {
+                        return Text(
+                          '${context.watch<LocationInfo>().getLocation}',
+                          style: HomePageFunctions().topBarText,
+                        );
+                      }),
+                    ),
+                    Container(
+                      padding: HomePageFunctions().topBarContainersPaddings,
+                      child: Consumer<SN>(builder: (context, imei, child) {
+                        return Text(
+                          '${context.watch<SN>().currentSN}',
+                          style: HomePageFunctions().topBarText,
+                        );
+                      }),
+                    ),
+                  ],
+                ),
+              ),
+              // описываем 2го ребенка Row - Row с иконками
+              Row(
+                /* описываем детей Row вызывая для каждого созданный стандартизированый
+                        метод для описания контейнера с иконками, передавая в них данные о 
+                        желаемом цвете иконки и ее озображении */
+                children: [
+                  Container(
+                    child:
+                        Consumer<Connection>(builder: (context, connection, child) {
+                      return Icon(
+                        HomePageFunctions().topBarIcon(statementIcons,
+                            context.watch<Connection>().getConnectionState),
+                        color: Colors.yellow,
+                      );
+                    }),
+                  ),
+                  Container(
+                    child:
+                        Consumer<LocationInfo>(builder: (context, location, child) {
+                      return Icon(
+                        HomePageFunctions().topBarIcon(statementIcons,
+                            context.watch<LocationInfo>().getGPSState),
+                        color: Colors.yellow,
+                      );
+                    }),
+                  ),
+                  // _iconContainer(iconsColor, _gpsIsActive, statementIcons),
+                ],
+              ),
+            ],
           ),
         ),
+        Expanded(
+          child: Column(
+            children: [
+              Expanded(
+                child: Container()),
+              Container(
+                padding: EdgeInsets.only(bottom: 25),
+                child: ElevatedButton(
+                  style: HomePageFunctions().sosButtonStyle,
+                  child: Text(
+                    'SOS',
+                  ),
+                  onPressed: () {
+                  },
+                    onLongPress: () {
+                    global.sos = 1;
+                    HomePageFunctions().socketConnect();
+                    global.sos = 0;
+                  },
+                ),
+              ),
+            ],
+          )),
       ],
     );
   }
